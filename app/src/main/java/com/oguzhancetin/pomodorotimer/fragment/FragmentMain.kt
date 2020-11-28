@@ -11,7 +11,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.oguzhancetin.pomodorotimer.background.MyService
@@ -19,9 +18,8 @@ import com.oguzhancetin.pomodorotimer.database.Pomodoro
 import com.oguzhancetin.pomodorotimer.databinding.FragmentMainBinding
 import com.oguzhancetin.pomodorotimer.util.Times
 import com.oguzhancetin.pomodorotimer.util.TimesSharedPreferences
+
 import com.oguzhancetin.pomodorotimer.viewmodel.FragmentMainViewmodel
-import com.oguzhancetin.pomodorotimer.viewmodel.FragmentMainViewmodelFactory
-import java.text.SimpleDateFormat
 import java.util.*
 
 
@@ -33,7 +31,8 @@ class FragmentMain : Fragment() {
     private lateinit var viewModel:FragmentMainViewmodel
 
     private lateinit var mCalendar: Calendar
-    var dumy = false
+    //check to set graph state
+    var graphState = false
     private lateinit var progressCircle:ProgressBar
     private  var progress = 100
     private  var whichTimeStart = 1L
@@ -56,20 +55,21 @@ class FragmentMain : Fragment() {
         //start long break
         binding.buttonLongbreak.setOnClickListener {
             startTimeService(Times.LONG_BREAK)
-            dumy = true
+            graphState = true
 
 
         }
         //start short break
         binding.buttonShortBreak.setOnClickListener {
             startTimeService(Times.SHORT_BREAK)
-            dumy = true
+            graphState = true
 
         }
         //start pomodoro
         binding.buttonStart.setOnClickListener {
             startTimeService(Times.START_TIME)
-            dumy = true
+            graphState = true
+
 
         }
 
@@ -95,44 +95,48 @@ class FragmentMain : Fragment() {
     @SuppressLint("LongLogTag")
     fun startTimeService(time: Times){
 
-        var status = false
+
+        var firstTrigger = false
+
 
         Intent(requireActivity(), MyService::class.java).also {
             it.putExtra("timeType",time)
+
             requireActivity().startService(it)
+            if(leftTime.hasObservers()){
+                leftTime.removeObservers(viewLifecycleOwner)
+                Log.e("observer","silindi")
+             }
             leftTime.observe(viewLifecycleOwner, Observer {
-                if(dumy){
+                if(firstTrigger){
+
+                    val leftString = (it/60000).toString()+": "+(((it%60000)/1000)+1).toString()
+                    timeText.text = leftString
+
+                    progress =  (((it.toDouble()/whichTimeStart.toDouble())*100)).toInt()
+                    progressCircle.progress = progress
+
+
+                    Log.e("leftS",it.toString())
+
+                    if(it.compareTo(0) == 0 ){
+                        timeText.text = "0:0"
+                        if(time.name.equals(Times.START_TIME.name)){
+                            val date = System.currentTimeMillis()
+                            viewModel.insertPomodoro(Pomodoro(finished_date_milis = date))
+                        }
+                    }
+
+                }
+                if(graphState){
                     whichTimeStart = it
-                    dumy = false
+                    graphState = false
                 }
-                timeText.text = (it/60000).toString()+": "+((it%60000)/1000).toString()
-                Log.e("whic time",whichTimeStart.toString())
+                firstTrigger = true
 
-
-
-                System.out.println("Progress: "+(((it.toDouble()/whichTimeStart.toDouble())*100)).toInt()+" timeLongLEft: "+it+
-                "bölünenzman: "+whichTimeStart)
-
-
-                progress =  (((it.toDouble()/whichTimeStart.toDouble())*100)).toInt()
-                progressCircle.progress = progress
-
-                Log.e("zaman",it.toString())
-
-                if(it.toInt() == 0 && status == false){
-                    status = true
-                    val date = System.currentTimeMillis()
-                    viewModel.insertPomodoro(Pomodoro(finished_date_milis = date))
-                    Log.e("lefttimeinsert","eklendi")
-                }
             })
 
         }
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
     }
 
 

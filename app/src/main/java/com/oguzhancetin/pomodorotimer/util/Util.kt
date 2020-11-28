@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.lifecycle.MutableLiveData
 
 
 //get sharedPreferences
@@ -24,13 +25,7 @@ class TimesSharedPreferences private constructor(){
 
         }
     }
-
-
-
-
-
-
-
-
 }
+
+
 

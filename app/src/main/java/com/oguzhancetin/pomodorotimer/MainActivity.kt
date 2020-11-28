@@ -5,6 +5,8 @@ import android.content.IntentFilter
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.AttributeSet
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.widget.ViewPager2
@@ -24,6 +26,12 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+
+        setSupportActionBar(findViewById(R.id.toolbar2))
+        supportActionBar?.setIcon(R.drawable.ic_baseline_timer_24)
+        supportActionBar?.setTitle(" Pomodoro")
+
 
         viewPager = findViewById(R.id.pager)
         val fragmentMain = FragmentMain()
@@ -46,6 +54,15 @@ class MainActivity : AppCompatActivity() {
         }.attach()
 
 
+        val s:String? = null
+
+        print(s)
+
+
+
+    }
+    fun print(s:String){
+        print(s)
     }
 
     override fun onStart() {
@@ -66,4 +83,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreateView(name: String, context: Context, attrs: AttributeSet): View? {
         return super.onCreateView(name, context, attrs)
     }
+
+
 }

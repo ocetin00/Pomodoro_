@@ -36,14 +36,20 @@ class MyService : Service() {
         //time type to start timer
         val timeType:Times = intent?.getSerializableExtra("timeType") as Times
         val time = TimesSharedPreferences.getSharred(this.applicationContext)?.getLong(timeType.name,timeType.time)
-        Log.e("timefrompref",(time!!/2000).toString()+"time type ${timeType.name}")
+        Log.e("timefrompref",(time!!/60000).toString()+"time type ${timeType.name}")
 
-        timer?.let {
-            it.cancel()
+
+        cancelTimer(timer)
+        timer = null
+        if(timer == null){
+            createTimer(time)
         }
-        createTimer(time)
-
         timer?.start()
+
+
+
+
+
 
         var intentnotification = Intent(this, MainActivity::class.java)
         intentnotification.flags = (Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
@@ -77,16 +83,15 @@ class MyService : Service() {
         return null
     }
     private fun createTimer(time: Long){
-       timer =  object : CountDownTimer(time, 1000){
+
+        Log.e("timetime",time.toString())
+         timer = object : CountDownTimer(time, 1000){
             override fun onTick(millisUntilFinished: Long) {
-                /*Toast.makeText(
-                    applicationContext,
-                    (millisUntilFinished / 1000).toString(),
-                    Toast.LENGTH_SHORT
-                ).show()*/
+
 
                 //save pomodoro to show in graph
 
+                Log.e("has",timer.toString())
 
                 //send left time
                 Intent("com.oguzhancetin.pomodorotimer.SEND_TIME").apply {
@@ -99,12 +104,15 @@ class MyService : Service() {
             override fun onFinish() {
                 Log.e("kaln", "bitti")
                 Intent("com.oguzhancetin.pomodorotimer.SEND_TIME").apply {
-                    putExtra("left",0)
+                    putExtra("left","x")
                     sendBroadcast(this)
                 }
                 stopSelf()
             }
         }
+
+
+
 
 
     }
@@ -126,5 +134,11 @@ class MyService : Service() {
 
         }
 
+    }
+    fun cancelTimer(timer: CountDownTimer?){
+        if(timer != null){
+            timer.cancel()
+
+        }
     }
 }
