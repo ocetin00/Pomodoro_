@@ -11,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.TextView
+import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.oguzhancetin.pomodorotimer.background.MyService
@@ -51,6 +52,7 @@ class FragmentMain : Fragment() {
         mCalendar = Calendar.getInstance()
 
         timeText = binding.textViewTimeLeft
+
 
         //start long break
         binding.buttonLongbreak.setOnClickListener {

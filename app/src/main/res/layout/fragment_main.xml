@@ -5,6 +5,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
 
+
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraintLayout"
         android:layout_width="match_parent"
@@ -14,10 +16,10 @@
             android:id="@+id/progress"
             android:layout_width="260dp"
             android:layout_height="260dp"
+
             android:indeterminate="false"
             android:progressDrawable="@drawable/circle_bar"
             app:layout_constraintBottom_toTopOf="@+id/button_start"
-
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
@@ -29,9 +31,8 @@
             android:layout_width="100dp"
             android:layout_height="70dp"
             android:layout_marginStart="15dp"
-            android:layout_marginBottom="120dp"
             android:text="Start"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toBottomOf="@+id/button_shortBreak"
             app:layout_constraintEnd_toStartOf="@+id/button_shortBreak"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent" />
@@ -40,21 +41,21 @@
             android:id="@+id/button_shortBreak"
             android:layout_width="100dp"
             android:layout_height="70dp"
-            android:layout_marginBottom="120dp"
+            android:layout_marginBottom="20dp"
             android:text="Short Break"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/button_longbreak"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/button_start" />
+            app:layout_constraintStart_toEndOf="@+id/button_start"
+            app:layout_constraintTop_toBottomOf="@+id/progress" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/button_longbreak"
             android:layout_width="100dp"
             android:layout_height="70dp"
             android:layout_marginEnd="15dp"
-            android:layout_marginBottom="120dp"
             android:text="Long Break"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toBottomOf="@+id/button_shortBreak"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/button_shortBreak" />

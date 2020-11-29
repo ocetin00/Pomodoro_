@@ -9,6 +9,7 @@ import android.os.IBinder
 import android.util.Log
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import com.oguzhancetin.pomodorotimer.MainActivity
 import com.oguzhancetin.pomodorotimer.R
 import com.oguzhancetin.pomodorotimer.util.Times
@@ -17,42 +18,37 @@ import com.oguzhancetin.pomodorotimer.util.TimesSharedPreferences
 class MyService : Service() {
 
 
-    private lateinit var pendingIntent:PendingIntent
-    private lateinit var notification:Notification
-    private var timer:CountDownTimer? = null
-
-
-
+    private lateinit var pendingIntent: PendingIntent
+    private lateinit var notification: Notification
+    private var timer: CountDownTimer? = null
 
 
     override fun onCreate() {
         super.onCreate()
 
 
-
     }
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
         //time type to start timer
-        val timeType:Times = intent?.getSerializableExtra("timeType") as Times
-        val time = TimesSharedPreferences.getSharred(this.applicationContext)?.getLong(timeType.name,timeType.time)
-        Log.e("timefrompref",(time!!/60000).toString()+"time type ${timeType.name}")
+        val timeType: Times = intent?.getSerializableExtra("timeType") as Times
+        val time = TimesSharedPreferences.getSharred(this.applicationContext)
+            ?.getLong(timeType.name, timeType.time)
+        Log.e("timefrompref", (time!! / 60000).toString() + "time type ${timeType.name}")
 
 
-        cancelTimer(timer)
+        cancelTime(timer)
         timer = null
-        if(timer == null){
+        if (timer == null) {
             createTimer(time)
         }
         timer?.start()
 
 
-
-
-
-
         var intentnotification = Intent(this, MainActivity::class.java)
-        intentnotification.flags = (Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+        intentnotification.flags =
+            (Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
 
 
         pendingIntent = PendingIntent.getActivity(
@@ -61,9 +57,9 @@ class MyService : Service() {
             intentnotification,
             PendingIntent.FLAG_UPDATE_CURRENT
         )
-        notification = NotificationCompat.Builder(this, "channel2")
-            .setContentTitle("pomodoro")
-            .setContentText("textofContent")
+        notification = NotificationCompat.Builder(this, "channelLow")
+            .setContentTitle("Pomodoro Timer")
+            .setContentText("Pomodo Running")
             .setSmallIcon(R.drawable.ic_launcher_background)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setTicker("tiker")
@@ -82,16 +78,17 @@ class MyService : Service() {
 
         return null
     }
-    private fun createTimer(time: Long){
 
-        Log.e("timetime",time.toString())
-         timer = object : CountDownTimer(time, 1000){
+    private fun createTimer(time: Long) {
+
+        Log.e("timetime", time.toString())
+        timer = object : CountDownTimer(time, 1000) {
             override fun onTick(millisUntilFinished: Long) {
 
 
                 //save pomodoro to show in graph
 
-                Log.e("has",timer.toString())
+                Log.e("has", timer.toString())
 
                 //send left time
                 Intent("com.oguzhancetin.pomodorotimer.SEND_TIME").apply {
@@ -104,39 +101,79 @@ class MyService : Service() {
             override fun onFinish() {
                 Log.e("kaln", "bitti")
                 Intent("com.oguzhancetin.pomodorotimer.SEND_TIME").apply {
-                    putExtra("left","x")
+                    putExtra("left", "x")
                     sendBroadcast(this)
                 }
                 stopSelf()
+                createNotification(this@MyService)
+
+
             }
         }
 
 
-
-
-
     }
 
-    fun createNotificationChannel(){
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-            val name = "pomodoroChannel2"
-            val descriptionText ="pomodoro2"
-            val importance = NotificationManager.IMPORTANCE_LOW
-            val channel = NotificationChannel("channel2", name, importance).apply {
-                description = descriptionText
+    //create notification
+    fun createNotification(context: Context) {
+
+
+        var builder: Notification? = null
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            var b = NotificationCompat.Builder(context, "channelHigh")
+                .setSmallIcon(R.drawable.ic_baseline_timer_24)
+                .setContentTitle("Time is over")
+                .setContentText("Pomodoro stopped")
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setContentIntent(pendingIntent)
+                //.setOngoing(true)
+
+
+            builder = b.build()
+        } else {
+            var b = NotificationCompat.Builder(context)
+                .setSmallIcon(R.drawable.ic_baseline_timer_24)
+                .setContentTitle("Time is over")
+                .setContentText("Pomodoro stopped")
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setContentIntent(pendingIntent)
+               // .setOngoing(true)
+            builder = b.build()
+
+
+
+        }
+        builder.flags += Notification.FLAG_AUTO_CANCEL
+        with(NotificationManagerCompat.from(context)) {
+
+            notify(111, builder)
+        }
+    }
+
+
+    fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+
+            val channeHigh = NotificationChannel("channelHigh", "HighChannel", NotificationManager.IMPORTANCE_HIGH).apply {
+                description = "High Channel"
+            }
+            val channelLow = NotificationChannel("channelLow", "LowChannel", NotificationManager.IMPORTANCE_LOW).apply {
+                description = "Low Channel"
             }
 
-            val notificationManager = this.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(channel)
+
+            val notificationManager =
+                this.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+            notificationManager.createNotificationChannel(channeHigh)
+            notificationManager.createNotificationChannel(channelLow)
+
 
         }
-        else{
-
-        }
-
     }
-    fun cancelTimer(timer: CountDownTimer?){
-        if(timer != null){
+
+    fun cancelTime(timer: CountDownTimer?) {
+        if (timer != null) {
             timer.cancel()
 
         }

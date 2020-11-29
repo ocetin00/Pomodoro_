@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.SeekBar
+import android.widget.TextView
 import android.widget.Toast
 import com.oguzhancetin.pomodorotimer.databinding.FragmentSettingsBinding
 import com.oguzhancetin.pomodorotimer.util.Times
@@ -16,10 +17,32 @@ import com.oguzhancetin.pomodorotimer.util.TimesSharedPreferences
 class SettingsFragment : Fragment() {
     private lateinit var sharedPref: SharedPreferences
 
+    init {
+
+    }
+
 
     override fun onStart() {
         super.onStart()
-        sharedPref = TimesSharedPreferences.getSharred(requireContext())!!
+
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+
+    }
+
+    /*
+    Initialize seekbars data and their texts
+     */
+    fun initializeData(bar:SeekBar,times: Times,seekBarText: TextView){
+        bar.max = 60
+        var min = (sharedPref.getLong(times.name,
+            times.time)/(60000)).toInt()
+        bar.progress = min
+        seekBarText.text = min.toString()+" min"
+
     }
 
     override fun onCreateView(
@@ -27,12 +50,15 @@ class SettingsFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+
+        sharedPref = TimesSharedPreferences.getSharred(requireContext())!!
         val binding = FragmentSettingsBinding.inflate(inflater)
 
-        binding.normalSeekbar.max = 60
-        binding.shortSeekbar.max = 60
-        binding.longSeekbar.max = 60
 
+
+        initializeData(binding.normalSeekbar,Times.START_TIME,binding.normalTextView)
+        initializeData(binding.shortSeekbar,Times.SHORT_BREAK,binding.shortTextView)
+        initializeData(binding.longSeekbar,Times.LONG_BREAK,binding.longTextView)
 
 
         binding.normalSeekbar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
@@ -76,6 +102,8 @@ class SettingsFragment : Fragment() {
                 this.progress = progress
                 binding.longTextView.text = progress.toString()+" min"
             }
+
+
 
             override fun onStartTrackingTouch(seekBar: SeekBar?) {
 
