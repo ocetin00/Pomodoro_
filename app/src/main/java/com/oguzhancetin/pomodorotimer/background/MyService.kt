@@ -33,9 +33,12 @@ class MyService : Service() {
 
         //time type to start timer
         val timeType: Times = intent?.getSerializableExtra("timeType") as Times
-        val time = TimesSharedPreferences.getSharred(this.applicationContext)
+        val time = 2000L
+            /*TimesSharedPreferences.getSharred(this.applicationContext)
             ?.getLong(timeType.name, timeType.time)
         Log.e("timefrompref", (time!! / 60000).toString() + "time type ${timeType.name}")
+
+             */
 
 
         cancelTime(timer)
@@ -59,7 +62,7 @@ class MyService : Service() {
         )
         notification = NotificationCompat.Builder(this, "channelLow")
             .setContentTitle("Pomodoro Timer")
-            .setContentText("Pomodo Running")
+            .setContentText("Pomodoro Running")
             .setSmallIcon(R.drawable.ic_launcher_background)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setTicker("tiker")
@@ -154,7 +157,7 @@ class MyService : Service() {
     fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 
-            val channeHigh = NotificationChannel("channelHigh", "HighChannel", NotificationManager.IMPORTANCE_HIGH).apply {
+            val channelHigh = NotificationChannel("channelHigh", "HighChannel", NotificationManager.IMPORTANCE_HIGH).apply {
                 description = "High Channel"
             }
             val channelLow = NotificationChannel("channelLow", "LowChannel", NotificationManager.IMPORTANCE_LOW).apply {
@@ -165,7 +168,7 @@ class MyService : Service() {
             val notificationManager =
                 this.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-            notificationManager.createNotificationChannel(channeHigh)
+            notificationManager.createNotificationChannel(channelHigh)
             notificationManager.createNotificationChannel(channelLow)
 
 
@@ -177,5 +180,10 @@ class MyService : Service() {
             timer.cancel()
 
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        stopSelf()
     }
 }

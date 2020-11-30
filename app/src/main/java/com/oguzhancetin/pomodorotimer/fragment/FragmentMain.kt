@@ -25,6 +25,7 @@ import java.util.*
 
 
 class FragmentMain : Fragment() {
+    private var serviceIntent:Intent? = null
 
     //Display time on the main fragment 00:00
     private lateinit var timeText:TextView
@@ -101,14 +102,15 @@ class FragmentMain : Fragment() {
         var firstTrigger = false
 
 
-        Intent(requireActivity(), MyService::class.java).also {
-            it.putExtra("timeType",time)
-
+         val serviceIntent = Intent(requireActivity(), MyService::class.java).also {
+            it.putExtra("timeType", time)
             requireActivity().startService(it)
-            if(leftTime.hasObservers()){
+        }
+            if (leftTime.hasObservers()) {
                 leftTime.removeObservers(viewLifecycleOwner)
-                Log.e("observer","silindi")
-             }
+                Log.e("observer", "silindi")
+            }
+
             leftTime.observe(viewLifecycleOwner, Observer {
                 if(firstTrigger){
 
@@ -120,11 +122,14 @@ class FragmentMain : Fragment() {
 
 
                     Log.e("leftS",it.toString())
-
-                    if(it.compareTo(0) == 0 ){
+                    val date = System.currentTimeMillis()
+                    Log.e("tarih",date.toString())
+                    if(it == 0L ){
                         timeText.text = "0:0"
                         if(time.name.equals(Times.START_TIME.name)){
                             val date = System.currentTimeMillis()
+                            Log.e("ekledi","ekledi")
+                            Log.e("tarih",date.toString())
                             viewModel.insertPomodoro(Pomodoro(finished_date_milis = date))
                         }
                     }
@@ -138,7 +143,16 @@ class FragmentMain : Fragment() {
 
             })
 
+
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        serviceIntent?.let {
+            requireActivity().stopService(it)
         }
+
+
     }
 
 
