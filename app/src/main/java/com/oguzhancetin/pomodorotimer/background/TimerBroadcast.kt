@@ -20,7 +20,7 @@ class TimerBroadcast : BroadcastReceiver() {
 
                 val left = intent.getLongExtra("left",0)
 
-                    leftTime.value = left
+                  //  leftTime.postValue(left)
 
 
         }

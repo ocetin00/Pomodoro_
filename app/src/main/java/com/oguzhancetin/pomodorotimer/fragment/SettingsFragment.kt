@@ -17,33 +17,8 @@ import com.oguzhancetin.pomodorotimer.util.TimesSharedPreferences
 class SettingsFragment : Fragment() {
     private lateinit var sharedPref: SharedPreferences
 
-    init {
-
-    }
 
 
-    override fun onStart() {
-        super.onStart()
-
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-
-    }
-
-    /*
-    Initialize seekbars data and their texts
-     */
-    fun initializeData(bar:SeekBar,times: Times,seekBarText: TextView){
-        bar.max = 60
-        var min = (sharedPref.getLong(times.name,
-            times.time)/(60000)).toInt()
-        bar.progress = min
-        seekBarText.text = min.toString()+" min"
-
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -138,5 +113,16 @@ class SettingsFragment : Fragment() {
             Toast.makeText(requireContext(), "Settings are changed!", Toast.LENGTH_SHORT).show()
 
         }
+    }
+    /*
+   Initialize seekbars data and their texts
+    */
+    fun initializeData(bar:SeekBar,times: Times,seekBarText: TextView){
+        bar.max = 60
+        bar.min = 1
+        var latestProgress = (sharedPref.getLong(times.name,times.time)/(60000)).toInt()
+        bar.progress = latestProgress
+        seekBarText.text = latestProgress.toString()+" min"
+
     }
 }

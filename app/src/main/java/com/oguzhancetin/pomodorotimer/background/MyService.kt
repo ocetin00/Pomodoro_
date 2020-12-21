@@ -14,6 +14,7 @@ import com.oguzhancetin.pomodorotimer.MainActivity
 import com.oguzhancetin.pomodorotimer.R
 import com.oguzhancetin.pomodorotimer.util.Times
 import com.oguzhancetin.pomodorotimer.util.TimesSharedPreferences
+import com.oguzhancetin.pomodorotimer.util.leftTime
 
 class MyService : Service() {
 
@@ -23,31 +24,9 @@ class MyService : Service() {
     private var timer: CountDownTimer? = null
 
 
+
     override fun onCreate() {
         super.onCreate()
-
-
-    }
-
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-
-        //time type to start timer
-        val timeType: Times = intent?.getSerializableExtra("timeType") as Times
-        val time = 2000L
-            /*TimesSharedPreferences.getSharred(this.applicationContext)
-            ?.getLong(timeType.name, timeType.time)
-        Log.e("timefrompref", (time!! / 60000).toString() + "time type ${timeType.name}")
-
-             */
-
-
-        cancelTime(timer)
-        timer = null
-        if (timer == null) {
-            createTimer(time)
-        }
-        timer?.start()
-
 
         var intentnotification = Intent(this, MainActivity::class.java)
         intentnotification.flags =
@@ -60,6 +39,34 @@ class MyService : Service() {
             intentnotification,
             PendingIntent.FLAG_UPDATE_CURRENT
         )
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+
+        //time type to start timer
+        val timeType: Times = intent?.getSerializableExtra("timeType") as Times
+        val time = 3000L
+        /*
+            TimesSharedPreferences.getSharred(this.applicationContext)
+            ?.getLong(timeType.name, timeType.time)
+        Log.e("timefrompref", (time!! / 60000).toString() + "time type ${timeType.name}")
+
+         */
+
+
+
+
+
+
+        cancelTime(timer)
+        timer = null
+        if (timer == null) {
+            createTimer(time)
+        }
+        timer?.start()
+
+
+
         notification = NotificationCompat.Builder(this, "channelLow")
             .setContentTitle("Pomodoro Timer")
             .setContentText("Pomodoro Running")
@@ -96,8 +103,9 @@ class MyService : Service() {
                 //send left time
                 Intent("com.oguzhancetin.pomodorotimer.SEND_TIME").apply {
                     putExtra("left", millisUntilFinished)
-                    Log.e("kalan", (millisUntilFinished / 2000).toString())
+                    Log.e("kalan", (millisUntilFinished).toString())
                     sendBroadcast(this)
+                    leftTime.postValue(millisUntilFinished)
                 }
             }
 

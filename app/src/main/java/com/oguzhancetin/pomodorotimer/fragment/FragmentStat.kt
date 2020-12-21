@@ -79,6 +79,7 @@ class FragmentStat : Fragment() {
             pomodoros?.let {
                 Log.e("sorted",it.size.toString())
                 setGraphData(pomodoros)
+                mLineChart.invalidate()
 
             }
 
@@ -107,21 +108,23 @@ class FragmentStat : Fragment() {
 
             Log.e("pday",pday.dayOfWeek.toString()+pday.monthValue)
 
-            if(pday.year == today.year && pday.month == today.month){
+           // if(pday.year == today.year && pday.month == today.month){
 
                 Log.e("value",pday.dayOfWeek.toString())
+                Log.e("deger",pday.dayOfWeek.value.toString())
                 when (pday.dayOfWeek.value.toString()) {
 
                     "1" -> days.set(0, days.get(0) + 1)
                     "2" -> days.set(1, days.get(1) + 1)
-                    "3" -> days.set(2, days.get(5) + 1)
+                    "3" -> days.set(2, days.get(2) + 1)
                     "4" -> days.set(3, days.get(3) + 1)
                     "5" -> days.set(4, days.get(4) + 1)
                     "6" -> days.set(5, days.get(5) + 1)
                     "7" -> days.set(6, days.get(6) + 1)
                 }
+                 Log.e("miktar",days.get(2).toString()+"    ds")
             }
-        }
+       // }
         if(days.sortedArrayDescending().first() >  mLineChart.axisLeft.axisMaximum){
             mLineChart.axisLeft.axisMaximum = (days.sortedArrayDescending().first()+2)*1f
         }
