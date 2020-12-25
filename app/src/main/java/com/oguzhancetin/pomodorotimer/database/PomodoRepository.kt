@@ -17,12 +17,18 @@ class PomodoRepository(context: Context) {
     private val pomodoroDao = PomodoroDatabase.getDatabase(context).pomodoroDao()
 
     init {
-        val today = LocalDateTime.now()
-        val t2 =  LocalDateTime.ofInstant(java.util.Date(System.currentTimeMillis()).toInstant(), ZoneId.systemDefault())
 
+        Log.e("todayMilis",System.currentTimeMillis().toString())
+        val numberOfDayOfWeek =  LocalDateTime.ofInstant(java.util.Date(System.currentTimeMillis()).toInstant(),
+            ZoneId.systemDefault()).dayOfWeek.value
+        val todayMilis = System.currentTimeMillis()
+        Log.e("today",todayMilis.toString())
+        val aDayMilis = (86400000L)
+        val totalMilis = (todayMilis)-((numberOfDayOfWeek-1)*aDayMilis)
+        Log.e("total",totalMilis.toString())
 
-        allPomodoro = pomodoroDao.getAllPomodoro(t2.dayOfWeek.value)
-        Log.e("dayof",t2.dayOfWeek.value.toString())
+        allPomodoro = pomodoroDao.getAllPomodoro(totalMilis)
+
     }
 
     suspend fun insertPomodoro(pomodoro: Pomodoro){

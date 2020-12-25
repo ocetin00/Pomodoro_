@@ -10,8 +10,8 @@ import java.time.DayOfWeek
 @Dao
 interface PomodoroDao {
 
-    @Query("SELECT * FROM Pomodoro WHERE finished_date > (1606728525072-((86400000)*:dayOfWeek))")
-    fun getAllPomodoro(dayOfWeek: Int): LiveData<List<Pomodoro>>
+    @Query("SELECT * FROM Pomodoro WHERE finished_date >:milis")
+    fun getAllPomodoro(milis: Long): LiveData<List<Pomodoro>>
 
     @Insert
     suspend fun insert(pomodoro: Pomodoro)

@@ -10,15 +10,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.RequiresApi
+import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.Description
 import com.github.mikephil.charting.components.XAxis
-import com.github.mikephil.charting.data.Entry
-import com.github.mikephil.charting.data.LineData
-import com.github.mikephil.charting.data.LineDataSet
+import com.github.mikephil.charting.data.*
 import com.oguzhancetin.pomodorotimer.R
 import com.oguzhancetin.pomodorotimer.database.Pomodoro
 import com.oguzhancetin.pomodorotimer.databinding.FragmentStatBinding
@@ -39,7 +39,7 @@ import kotlin.collections.ArrayList
 class FragmentStat : Fragment() {
 
     private lateinit var fragmentStatusViewModel: FragmentStatusViewModel
-    private lateinit var mLineChart: LineChart
+    private lateinit var mLineChart: BarChart
 
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -62,18 +62,28 @@ class FragmentStat : Fragment() {
 
 
 
+
+
         mLineChart.xAxis.setDrawGridLines(false)
         mLineChart.also {
             it.setTouchEnabled(false)
-            it.xAxis.axisMaximum = 6f
+            it.xAxis.axisMaximum = 6.5f
+            //it.xAxis.setAxisMinimum(3f);
+           // it.xAxis.yOffset = -7f
+
+            /*
             it.xAxis.axisMinimum = 0f
             it.axisLeft.axisMinimum = 0f
-            it.axisLeft.axisMaximum = 6f
-            it.xAxis.yOffset = 14f
+            it.axisLeft.axisMaximum = 0f
+
           //  it.axisLeft.mAxisRange = 23f
+
+             */
 
 
         }
+
+
 
         fragmentStatusViewModel.allPomodoro.observe(viewLifecycleOwner, Observer { pomodoros ->
             pomodoros?.let {
@@ -98,14 +108,14 @@ class FragmentStat : Fragment() {
 
 
 
-        val days = arrayOf(0, 0, 0, 0, 0, 0, 0, 0)
+        val days = arrayOf(0, 0, 0, 0, 0, 0, 0)
 
         //sorted to obtain which day and added to days array
         sortedPomodoros.forEach {
 
 
             val pday = LocalDateTime.ofInstant(Date(it.finished_date_milis).toInstant(), ZoneId.systemDefault())
-
+            Log.e("pomdorodo__1","day : "+pday+"milis: "+it.finished_date_milis)
             Log.e("pday",pday.dayOfWeek.toString()+pday.monthValue)
 
            // if(pday.year == today.year && pday.month == today.month){
@@ -122,7 +132,7 @@ class FragmentStat : Fragment() {
                     "6" -> days.set(5, days.get(5) + 1)
                     "7" -> days.set(6, days.get(6) + 1)
                 }
-                 Log.e("miktar",days.get(2).toString()+"    ds")
+                 Log.e("miktar",days.get(6).toString()+"    ")
             }
        // }
         if(days.sortedArrayDescending().first() >  mLineChart.axisLeft.axisMaximum){
@@ -134,19 +144,21 @@ class FragmentStat : Fragment() {
         }
 
 
-        val entries = ArrayList<Entry>()
-        for(x in 0 until days.size-1){
-            entries.add(Entry(x.toFloat(),days.get(x).toFloat()))
+        val entries = ArrayList<BarEntry>()
+        for(x in 0 until days.size){
+            entries.add(BarEntry(x.toFloat(),days.get(x).toFloat()))
         }
 
 
-        val dataSet = LineDataSet(entries,"Pomodoro Number").also {
-            it.setColor(Color.parseColor("#FA5858"))
+        val dataSet = BarDataSet(entries,"Pomodoro Number").also {
+            val color = ContextCompat.getColor(requireContext(),R.color.colorPrimary)
+            it.setColor(color)
 
 
         }
 
-        val lineData = LineData(dataSet).also {
+        val lineData = BarData(dataSet).also {
+            it.barWidth = 0.6f
 
             mLineChart.data = it
             val desc = Description()
@@ -157,12 +169,4 @@ class FragmentStat : Fragment() {
         }
 
     }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        Log.e("stat","destroy")
-    }
-
-
-
 }
