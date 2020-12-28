@@ -19,9 +19,12 @@ import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.Description
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.*
+import com.github.mikephil.charting.formatter.IValueFormatter
+import com.github.mikephil.charting.formatter.ValueFormatter
 import com.oguzhancetin.pomodorotimer.R
 import com.oguzhancetin.pomodorotimer.database.Pomodoro
 import com.oguzhancetin.pomodorotimer.databinding.FragmentStatBinding
+import com.oguzhancetin.pomodorotimer.util.IntegerFormatter
 import com.oguzhancetin.pomodorotimer.util.MyaxisFormatter
 import com.oguzhancetin.pomodorotimer.viewmodel.FragmentMainViewmodelFactory
 import com.oguzhancetin.pomodorotimer.viewmodel.FragmentStatusViewModel
@@ -40,6 +43,8 @@ class FragmentStat : Fragment() {
 
     private lateinit var fragmentStatusViewModel: FragmentStatusViewModel
     private lateinit var mLineChart: BarChart
+
+    var yAxisMax:Float= 10f;
 
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -68,8 +73,11 @@ class FragmentStat : Fragment() {
         mLineChart.also {
             it.setTouchEnabled(false)
             it.xAxis.axisMaximum = 6.5f
+            it.xAxis.granularity = 1f;
+            it.axisLeft.axisMinimum = 0f;
+            it.axisLeft.axisMaximum = yAxisMax;
             //it.xAxis.setAxisMinimum(3f);
-           // it.xAxis.yOffset = -7f
+            it.xAxis.yOffset = 13f
 
             /*
             it.xAxis.axisMinimum = 0f
@@ -122,6 +130,9 @@ class FragmentStat : Fragment() {
 
                 Log.e("value",pday.dayOfWeek.toString())
                 Log.e("deger",pday.dayOfWeek.value.toString())
+                if(days.get(days.get(pday.dayOfWeek.value)) >= yAxisMax ){
+                        yAxisMax+2
+                }
                 when (pday.dayOfWeek.value.toString()) {
 
                     "1" -> days.set(0, days.get(0) + 1)
@@ -131,6 +142,10 @@ class FragmentStat : Fragment() {
                     "5" -> days.set(4, days.get(4) + 1)
                     "6" -> days.set(5, days.get(5) + 1)
                     "7" -> days.set(6, days.get(6) + 1)
+
+
+
+
                 }
                  Log.e("miktar",days.get(6).toString()+"    ")
             }
@@ -151,6 +166,7 @@ class FragmentStat : Fragment() {
 
 
         val dataSet = BarDataSet(entries,"Pomodoro Number").also {
+            it.valueFormatter = IntegerFormatter()
             val color = ContextCompat.getColor(requireContext(),R.color.colorPrimary)
             it.setColor(color)
 
