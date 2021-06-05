@@ -38,6 +38,7 @@ class MainActivity : AppCompatActivity() {
         val fragmentStat = FragmentStat()
         val fragmetnSettings = SettingsFragment()
         val fragmentList = ArrayList<Fragment>()
+
         fragmentList.add((fragmentMain))
         fragmentList.add(fragmentStat)
         fragmentList.add(fragmetnSettings)

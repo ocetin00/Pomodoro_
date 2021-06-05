@@ -2,7 +2,6 @@ package com.oguzhancetin.pomodorotimer.fragment
 
 import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -13,7 +12,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.TextView
-import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.oguzhancetin.pomodorotimer.background.MyService
@@ -46,15 +44,21 @@ class FragmentMain : Fragment() {
     private var global_time_type = Times.START_TIME
     private var global_time_control = true
 
+    //1sec
+    val oneMin = 60000L
+    val oneSec = 1000L
+
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         val binding = FragmentMainBinding.inflate(inflater)
+
         progressCircle = binding.progress
         progressCircle.progress = progress
-        //val viewmodelFactory = FragmentMainViewmodelFactory(requireActivity().application)
+
         viewModel = ViewModelProvider(this).get(FragmentMainViewmodel::class.java)
         //viewModel.deleteAlldata()
         mCalendar = Calendar.getInstance()
@@ -62,26 +66,21 @@ class FragmentMain : Fragment() {
         timeText = binding.textViewTimeLeft
 
 
-
-
-
-
-
         //start long break
         binding.buttonLongbreak.setOnClickListener {
+            clearService()
             startTimeService(Times.LONG_BREAK)
             graphState = true
-
-
         }
         //start short break
         binding.buttonShortBreak.setOnClickListener {
+            clearService()
             startTimeService(Times.SHORT_BREAK)
             graphState = true
-
         }
         //start pomodoro
         binding.buttonStart.setOnClickListener {
+            clearService()
             startTimeService(Times.START_TIME)
             graphState = true
 
@@ -89,13 +88,10 @@ class FragmentMain : Fragment() {
         }
 
         //to write default time before start (25:00)
-        val longTime = TimesSharedPreferences.getSharred(requireActivity())?.getLong(Times.START_TIME.name,Times.START_TIME.time)
-        val longTimeString = (longTime!!/60000).toString()+": "+(((longTime%60000)/1000)).toString()
+        val longTime = TimesSharedPreferences
+            .getSharred(requireActivity())?.getLong(Times.START_TIME.name,Times.START_TIME.time)
+        val longTimeString = (longTime!!/oneMin).toString()+": "+(((longTime%oneMin)/oneSec)).toString()
         timeText.text = longTimeString
-        Log.e("current",timeText.toString() +"  dsda")
-
-
-
 
         viewModel.allPomodoro.observe(viewLifecycleOwner, Observer {
             it.forEach {
@@ -103,11 +99,6 @@ class FragmentMain : Fragment() {
                 Log.e("pomodoro",mCalendar.get(Calendar.DAY_OF_MONTH).toString()+"/"+mCalendar.get(Calendar.MONDAY).toString())
             }
         })
-
-
-
-
-
 
         return binding.root
     }
@@ -121,7 +112,7 @@ class FragmentMain : Fragment() {
         var firstTrigger = false
 
 
-         val serviceIntent = Intent(requireActivity(), MyService::class.java).also {
+            serviceIntent = Intent(requireActivity(), MyService::class.java).also {
             it.putExtra("timeType", time)
             requireActivity().startService(it)
         }
@@ -135,22 +126,20 @@ class FragmentMain : Fragment() {
                 Log.e("trigger","true");
                 if(firstTrigger){
 
-                    val leftString = (it/60000).toString()+": "+(((it%60000)/1000)+1).toString()
+                    val leftString = (it/oneMin).toString()+" : "+(((it%oneMin)/oneSec)+1).toString()
                     timeText.text = leftString
                     globalLeft = it
                     progress =  (((it.toDouble()/whichTimeStart.toDouble())*100)).toInt()
                     progressCircle.progress = progress
 
 
-                    Log.e("leftS",it.toString())
-                    val date = System.currentTimeMillis()
-                    Log.e("tarih",date.toString())
-                    if(it <999 && global_time_control==false ){
 
-                        if(time.name.equals(Times.START_TIME.name)){
+                    //it <999 && global_time_control==false
+
+                    if(it == 0L ){
+                        timeText.text = "0 : 0"
+                        if(global_time_type == Times.START_TIME){
                             val date = System.currentTimeMillis()
-                            Log.e("ekledi","ekledi")
-                            Log.e("tarih",date.toString())
                             global_time_control = true
                             viewModel.insertPomodoro(Pomodoro(finished_date_milis = date))
                         }
@@ -164,23 +153,15 @@ class FragmentMain : Fragment() {
                 firstTrigger = true
 
             })
-
-
-
-
     }
-
 
     override fun onDestroy() {
         super.onDestroy()
+        clearService()
+    }
+    private fun clearService(){
         serviceIntent?.let {
             requireActivity().stopService(it)
         }
-
-
     }
-
-
-
-
 }

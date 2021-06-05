@@ -53,57 +53,39 @@ class FragmentStat : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
 
-        Log.e("stat","created")
+
         // Inflate the layout for this fragment
         val binding = FragmentStatBinding.inflate(inflater)
-
 
         //val viewModelFactory = FragmentMainViewmodelFactory(requireActivity().application)
         fragmentStatusViewModel = ViewModelProvider(this).get(FragmentStatusViewModel::class.java)
 
         mLineChart = binding.chart
-        mLineChart.xAxis.valueFormatter = MyaxisFormatter()
-        mLineChart.axisRight.isEnabled = false
-
-
-
-
-
-        mLineChart.xAxis.setDrawGridLines(false)
-        mLineChart.also {
-            it.setTouchEnabled(false)
-            it.xAxis.axisMaximum = 6.5f
-            it.xAxis.granularity = 1f;
-            it.axisLeft.axisMinimum = 0f;
-            it.axisLeft.axisMaximum = yAxisMax;
-            //it.xAxis.setAxisMinimum(3f);
-            it.xAxis.yOffset = 13f
-
-            /*
-            it.xAxis.axisMinimum = 0f
-            it.axisLeft.axisMinimum = 0f
-            it.axisLeft.axisMaximum = 0f
-
-          //  it.axisLeft.mAxisRange = 23f
-
-             */
-
-
-        }
-
+        cofigureLineChart(mLineChart)
 
 
         fragmentStatusViewModel.allPomodoro.observe(viewLifecycleOwner, Observer { pomodoros ->
             pomodoros?.let {
-                Log.e("sorted",it.size.toString())
                 setGraphData(pomodoros)
                 mLineChart.invalidate()
-
             }
-
         })
-
         return binding.root
+    }
+
+    private fun cofigureLineChart(mLineChart: BarChart) {
+        mLineChart.apply {
+            xAxis.valueFormatter = MyaxisFormatter()
+            axisRight.isEnabled = false
+            xAxis.setDrawGridLines(false)
+            setTouchEnabled(false)
+            xAxis.axisMaximum = 6.5f
+            xAxis.granularity = 1f;
+            axisLeft.axisMinimum = 0f;
+            axisLeft.axisMaximum = yAxisMax;
+            xAxis.yOffset = 13f
+        }
+
     }
 
     //set graph entries
@@ -112,29 +94,16 @@ class FragmentStat : Fragment() {
         val today = LocalDateTime.now()
         val t2 =  LocalDateTime.ofInstant(Date(System.currentTimeMillis()).toInstant(), ZoneId.systemDefault())
 
-        Log.e("today",today.year.toString()+" "+today.monthValue+today.dayOfWeek+"  // "+t2.dayOfWeek+" "+t2.monthValue)
-
-
-
         val days = arrayOf(0, 0, 0, 0, 0, 0, 0)
 
         //sorted to obtain which day and added to days array
         sortedPomodoros.forEach {
 
-
             val pday = LocalDateTime.ofInstant(Date(it.finished_date_milis).toInstant(), ZoneId.systemDefault())
-            Log.e("pomdorodo__1","day : "+pday+"milis: "+it.finished_date_milis)
-            Log.e("pday",pday.dayOfWeek.toString()+pday.monthValue)
-
-           // if(pday.year == today.year && pday.month == today.month){
-
-                Log.e("value",pday.dayOfWeek.toString())
-                Log.e("deger",pday.dayOfWeek.value.toString())
                 if(days.get(days.get(pday.dayOfWeek.value)) >= yAxisMax ){
                         yAxisMax+2
                 }
                 when (pday.dayOfWeek.value.toString()) {
-
                     "1" -> days.set(0, days.get(0) + 1)
                     "2" -> days.set(1, days.get(1) + 1)
                     "3" -> days.set(2, days.get(2) + 1)
@@ -142,28 +111,17 @@ class FragmentStat : Fragment() {
                     "5" -> days.set(4, days.get(4) + 1)
                     "6" -> days.set(5, days.get(5) + 1)
                     "7" -> days.set(6, days.get(6) + 1)
-
-
-
-
                 }
-                 Log.e("miktar",days.get(6).toString()+"    ")
             }
        // }
         if(days.sortedArrayDescending().first() >  mLineChart.axisLeft.axisMaximum){
             mLineChart.axisLeft.axisMaximum = (days.sortedArrayDescending().first()+2)*1f
         }
 
-        for(x in days){
-            Log.e("daysnumber",x.toString())
-        }
-
-
         val entries = ArrayList<BarEntry>()
         for(x in 0 until days.size){
             entries.add(BarEntry(x.toFloat(),days.get(x).toFloat()))
         }
-
 
         val dataSet = BarDataSet(entries,"Pomodoro Number").also {
             it.valueFormatter = IntegerFormatter()
@@ -175,14 +133,11 @@ class FragmentStat : Fragment() {
 
         val lineData = BarData(dataSet).also {
             it.barWidth = 0.6f
-
             mLineChart.data = it
             val desc = Description()
             desc.text = ""
             mLineChart.description = desc
             mLineChart.invalidate()
-
         }
-
     }
 }

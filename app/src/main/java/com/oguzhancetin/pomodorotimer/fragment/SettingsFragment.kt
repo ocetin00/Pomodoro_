@@ -19,7 +19,6 @@ class SettingsFragment : Fragment() {
 
 
 
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -29,8 +28,7 @@ class SettingsFragment : Fragment() {
         sharedPref = TimesSharedPreferences.getSharred(requireContext())!!
         val binding = FragmentSettingsBinding.inflate(inflater)
 
-
-
+        
         initializeData(binding.normalSeekbar,Times.START_TIME,binding.normalTextView)
         initializeData(binding.shortSeekbar,Times.SHORT_BREAK,binding.shortTextView)
         initializeData(binding.longSeekbar,Times.LONG_BREAK,binding.longTextView)

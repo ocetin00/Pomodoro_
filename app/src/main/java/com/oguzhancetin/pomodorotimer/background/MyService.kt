@@ -45,17 +45,10 @@ class MyService : Service() {
 
         //time type to start timer
         val timeType: Times = intent?.getSerializableExtra("timeType") as Times
-        val time = 3000L
-        /*
-            TimesSharedPreferences.getSharred(this.applicationContext)
+        //get default time
+        val time = TimesSharedPreferences.getSharred(this.applicationContext)
             ?.getLong(timeType.name, timeType.time)
         Log.e("timefrompref", (time!! / 60000).toString() + "time type ${timeType.name}")
-
-         */
-
-
-
-
 
 
         cancelTime(timer)
@@ -64,7 +57,6 @@ class MyService : Service() {
             createTimer(time)
         }
         timer?.start()
-
 
 
         notification = NotificationCompat.Builder(this, "channelLow")
@@ -78,8 +70,6 @@ class MyService : Service() {
 
         createNotificationChannel()
         startForeground(3, notification)
-        Log.e("service", "onstartCommand")
-
 
         return START_NOT_STICKY
     }
@@ -90,27 +80,25 @@ class MyService : Service() {
     }
 
     private fun createTimer(time: Long) {
-
-        Log.e("timetime", time.toString())
         timer = object : CountDownTimer(time, 1000) {
             override fun onTick(millisUntilFinished: Long) {
 
-
                 //save pomodoro to show in graph
-
                 Log.e("has", timer.toString())
 
                 //send left time
-                Intent("com.oguzhancetin.pomodorotimer.SEND_TIME").apply {
+                leftTime.postValue(millisUntilFinished)
+               /* Intent("com.oguzhancetin.pomodorotimer.SEND_TIME").apply {
                     putExtra("left", millisUntilFinished)
                     Log.e("kalan", (millisUntilFinished).toString())
                     sendBroadcast(this)
-                    leftTime.postValue(millisUntilFinished)
-                }
+
+                }*/
             }
 
             override fun onFinish() {
                 Log.e("kaln", "bitti")
+                leftTime.postValue(0L)
                 Intent("com.oguzhancetin.pomodorotimer.SEND_TIME").apply {
                     putExtra("left", "x")
                     sendBroadcast(this)
