@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import com.oguzhancetin.pomodorotimer.util.leftTime
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -38,7 +37,7 @@ class FragmentMain : Fragment() {
     var graphState = false
     private lateinit var progressCircle:ProgressBar
     private  var progress = 100
-    private  var whichTimeStart = 1L
+    private  var leftGraph = 1L
 
     private var globalLeft = 10000L
     private var global_time_type = Times.START_TIME
@@ -65,22 +64,23 @@ class FragmentMain : Fragment() {
 
         timeText = binding.textViewTimeLeft
 
+        serviceIntent = Intent(requireActivity(), MyService::class.java)
+
 
         //start long break
         binding.buttonLongbreak.setOnClickListener {
-            clearService()
             startTimeService(Times.LONG_BREAK)
             graphState = true
         }
         //start short break
         binding.buttonShortBreak.setOnClickListener {
-            clearService()
+
             startTimeService(Times.SHORT_BREAK)
             graphState = true
         }
         //start pomodoro
         binding.buttonStart.setOnClickListener {
-            clearService()
+
             startTimeService(Times.START_TIME)
             graphState = true
 
@@ -90,46 +90,54 @@ class FragmentMain : Fragment() {
         //to write default time before start (25:00)
         val longTime = TimesSharedPreferences
             .getSharred(requireActivity())?.getLong(Times.START_TIME.name,Times.START_TIME.time)
-        val longTimeString = (longTime!!/oneMin).toString()+": "+(((longTime%oneMin)/oneSec)).toString()
+        val longTimeString = printLeftMinutes(longTime)
         timeText.text = longTimeString
 
-        viewModel.allPomodoro.observe(viewLifecycleOwner, Observer {
+       /* viewModel.allPomodoro.observe(viewLifecycleOwner, Observer {
             it.forEach {
                 mCalendar.timeInMillis = (it.finished_date_milis)
                 Log.e("pomodoro",mCalendar.get(Calendar.DAY_OF_MONTH).toString()+"/"+mCalendar.get(Calendar.MONDAY).toString())
             }
-        })
+        })*/
 
         return binding.root
     }
 
+    private fun printLeftMinutes(longTime: Long?) :String {
+        var minute = (longTime!! / oneMin).toString()
+        var second = ((longTime % oneMin) / oneSec).toString()
+        if(minute.length == 1) minute = "0${minute}"
+        if(second.length == 1) second = "0${second}"
+
+       return "${minute} : ${second}";
+    }
+
+
     @SuppressLint("LongLogTag")
     fun startTimeService(time: Times){
-
+        clearService()
         global_time_type = time
         global_time_control = false;
 
-        var firstTrigger = false
+        //var firstTrigger = false
 
 
-            serviceIntent = Intent(requireActivity(), MyService::class.java).also {
-            it.putExtra("timeType", time)
+            serviceIntent.also {
+            it?.putExtra("timeType", time)
             requireActivity().startService(it)
         }
 
             if (leftTime.hasObservers()) {
                 leftTime.removeObservers(viewLifecycleOwner)
-                Log.e("observer", "silindi")
             }
 
             leftTime.observe(requireActivity(), Observer {
-                Log.e("trigger","true");
-                if(firstTrigger){
+               // if(firstTrigger){
 
-                    val leftString = (it/oneMin).toString()+" : "+(((it%oneMin)/oneSec)+1).toString()
-                    timeText.text = leftString
-                    globalLeft = it
-                    progress =  (((it.toDouble()/whichTimeStart.toDouble())*100)).toInt()
+                   // val leftString = (it/oneMin).toString()+" : "+(((it%oneMin)/oneSec)+1).toString()
+                    timeText.text = printLeftMinutes(it)
+                    //globalLeft = it
+                    progress =  (((it.toDouble()/leftGraph.toDouble())*100)).toInt()
                     progressCircle.progress = progress
 
 
@@ -137,7 +145,8 @@ class FragmentMain : Fragment() {
                     //it <999 && global_time_control==false
 
                     if(it == 0L ){
-                        timeText.text = "0 : 0"
+                        timeText.text = "00 : 00"
+
                         if(global_time_type == Times.START_TIME){
                             val date = System.currentTimeMillis()
                             global_time_control = true
@@ -145,12 +154,12 @@ class FragmentMain : Fragment() {
                         }
                     }
 
-                }
+               // }
                 if(graphState){
-                    whichTimeStart = it
+                    leftGraph = it
                     graphState = false
                 }
-                firstTrigger = true
+
 
             })
     }

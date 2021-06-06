@@ -21,7 +21,7 @@ class MyService : Service() {
 
     private lateinit var pendingIntent: PendingIntent
     private lateinit var notification: Notification
-    private var timer: CountDownTimer? = null
+    private  var timer: CountDownTimer? = null
 
 
 
@@ -51,11 +51,7 @@ class MyService : Service() {
         Log.e("timefrompref", (time!! / 60000).toString() + "time type ${timeType.name}")
 
 
-        cancelTime(timer)
-        timer = null
-        if (timer == null) {
-            createTimer(time)
-        }
+        createTimer(time)
         timer?.start()
 
 
@@ -160,7 +156,6 @@ class MyService : Service() {
                 description = "Low Channel"
             }
 
-
             val notificationManager =
                 this.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
@@ -171,15 +166,11 @@ class MyService : Service() {
         }
     }
 
-    fun cancelTime(timer: CountDownTimer?) {
-        if (timer != null) {
-            timer.cancel()
-
-        }
-    }
 
     override fun onDestroy() {
         super.onDestroy()
+        timer?.cancel()
+        timer = null
         stopSelf()
     }
 }

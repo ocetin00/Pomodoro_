@@ -91,8 +91,8 @@ class FragmentStat : Fragment() {
     //set graph entries
     @RequiresApi(Build.VERSION_CODES.O)
     fun setGraphData(sortedPomodoros: List<Pomodoro>) {
-        val today = LocalDateTime.now()
-        val t2 =  LocalDateTime.ofInstant(Date(System.currentTimeMillis()).toInstant(), ZoneId.systemDefault())
+       /* val today = LocalDateTime.now()
+        val t2 =  LocalDateTime.ofInstant(Date(System.currentTimeMillis()).toInstant(), ZoneId.systemDefault())*/
 
         val days = arrayOf(0, 0, 0, 0, 0, 0, 0)
 
@@ -100,9 +100,9 @@ class FragmentStat : Fragment() {
         sortedPomodoros.forEach {
 
             val pday = LocalDateTime.ofInstant(Date(it.finished_date_milis).toInstant(), ZoneId.systemDefault())
-                if(days.get(days.get(pday.dayOfWeek.value)) >= yAxisMax ){
+              /*  if(days.get(days.get(pday.dayOfWeek.value)) >= yAxisMax ){
                         yAxisMax+2
-                }
+                }*/
                 when (pday.dayOfWeek.value.toString()) {
                     "1" -> days.set(0, days.get(0) + 1)
                     "2" -> days.set(1, days.get(1) + 1)
