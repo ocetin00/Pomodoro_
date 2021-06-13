@@ -23,14 +23,18 @@ class MainActivity : AppCompatActivity() {
     val timerBroadcastReceiver = TimerBroadcast()
 
     private lateinit var viewPager: ViewPager2
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
+      
 
         setSupportActionBar(findViewById(R.id.toolbar2))
         supportActionBar?.setIcon(R.drawable.ic_baseline_timer_24)
         supportActionBar?.setTitle(" Pomodoro")
+
+
+
 
 
         viewPager = findViewById(R.id.pager)

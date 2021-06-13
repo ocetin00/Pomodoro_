@@ -10,24 +10,26 @@ import com.oguzhancetin.pomodorotimer.database.Pomodoro
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class FragmentMainViewmodel(application: Application): AndroidViewModel(application) {
-    val room = PomodoRepository(application.baseContext)
+class FragmentMainViewmodel(application: Application) : AndroidViewModel(application) {
+    val mRepository = PomodoRepository(application.baseContext)
 
-    lateinit var allPomodoro:LiveData<List<Pomodoro>>
+    lateinit var allPomodoro: LiveData<List<Pomodoro>>
 
     init {
-        allPomodoro = room.allPomodoro
+        allPomodoro = mRepository.allPomodoro
     }
-    fun insertPomodoro(pomodoro: Pomodoro){
-        Log.e("insert","insert")
+
+    fun insertPomodoro(pomodoro: Pomodoro) {
+        Log.e("insert", "insert")
         viewModelScope.launch(Dispatchers.IO) {
-            room.insertPomodoro(pomodoro)
+            mRepository.insertPomodoro(pomodoro)
         }
 
     }
-    fun deleteAlldata(){
+
+    fun deleteAlldata() {
         viewModelScope.launch(Dispatchers.IO) {
-            room.deleteAllPomodoro()
+            mRepository.deleteAllPomodoro()
         }
     }
 

@@ -2,4 +2,6 @@ package com.oguzhancetin.pomodorotimer.util
 
 import androidx.lifecycle.MutableLiveData
 
-val leftTime = MutableLiveData<Long>()
+fun <T : Any?> MutableLiveData<T>.default(initialValue: T) = apply { setValue(initialValue) }
+
+val leftTime = MutableLiveData<Long>().default(1L)

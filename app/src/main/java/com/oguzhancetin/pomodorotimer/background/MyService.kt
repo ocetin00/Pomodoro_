@@ -46,8 +46,8 @@ class MyService : Service() {
         //time type to start timer
         val timeType: Times = intent?.getSerializableExtra("timeType") as Times
         //get default time
-        val time = TimesSharedPreferences.getSharred(this.applicationContext)
-            ?.getLong(timeType.name, timeType.time)
+        val time = 6000L /* TimesSharedPreferences.getSharred(this.applicationContext)
+            ?.getLong(timeType.name, timeType.time)*/
         Log.e("timefrompref", (time!! / 60000).toString() + "time type ${timeType.name}")
 
 
@@ -165,6 +165,7 @@ class MyService : Service() {
 
         }
     }
+
 
 
     override fun onDestroy() {
