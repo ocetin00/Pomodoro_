@@ -10,6 +10,7 @@ This project includes some of the latest features in Android development:
 
 - Uses kotlin completely
 - Uses AndroidX & Android Architecture Components (ViewModel, LiveData,DataBinding,Room)
+- Uses manuel di approach
 
 For more details, you can check the source code directly.
 
