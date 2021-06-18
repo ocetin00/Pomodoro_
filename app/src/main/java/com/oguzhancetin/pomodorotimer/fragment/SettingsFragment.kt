@@ -7,8 +7,10 @@ import androidx.fragment.app.Fragment
 import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
-import androidx.lifecycle.ViewModelProvider
+import com.oguzhancetin.pomodorotimer.MyApplication
 import com.oguzhancetin.pomodorotimer.R
+import com.oguzhancetin.pomodorotimer.di.AppContainer
+import com.oguzhancetin.pomodorotimer.di.FragmentSettingContainer
 import com.oguzhancetin.pomodorotimer.databinding.FragmentSettingsBinding
 import com.oguzhancetin.pomodorotimer.util.Times
 import com.oguzhancetin.pomodorotimer.util.TimesSharedPreferences
@@ -17,7 +19,8 @@ import com.oguzhancetin.pomodorotimer.viewmodel.FragmentSettingViewmodel
 
 class SettingsFragment : Fragment() {
     private lateinit var sharedPref: SharedPreferences
-    private lateinit var viewModel: FragmentSettingViewmodel
+    private var viewModel: FragmentSettingViewmodel? = null
+    private lateinit var appContainer: AppContainer
 
 
     override fun onCreateView(
@@ -29,8 +32,11 @@ class SettingsFragment : Fragment() {
 
         sharedPref = TimesSharedPreferences.getSharred(requireContext())!!
         val binding = FragmentSettingsBinding.inflate(inflater)
-        viewModel = ViewModelProvider(this).get(FragmentSettingViewmodel::class.java)
 
+
+
+        initializeContainer()
+        viewModel = appContainer.fragmentSettingContainer?.fragmentSettingViewmodel
 
         initializeData(binding.normalSeekbar, Times.START_TIME, binding.normalTextView)
         initializeData(binding.shortSeekbar, Times.SHORT_BREAK, binding.shortTextView)
@@ -41,7 +47,7 @@ class SettingsFragment : Fragment() {
             var progress = 0
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 this.progress = progress
-                binding.normalTextView.text = progress.toString() + " min"
+                binding.normalTextView.text = "${progress.toString()}   min"
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar?) {
@@ -58,7 +64,7 @@ class SettingsFragment : Fragment() {
             var progress = 0
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 this.progress = progress
-                binding.shortTextView.text = progress.toString() + " min"
+                binding.shortTextView.text = "${progress.toString()}   min"
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar?) {
@@ -76,7 +82,7 @@ class SettingsFragment : Fragment() {
             var progress = 0
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 this.progress = progress
-                binding.longTextView.text = progress.toString() + " min"
+                binding.longTextView.text = "${progress.toString()}   min"
             }
 
 
@@ -95,6 +101,12 @@ class SettingsFragment : Fragment() {
 
 
         return binding.root
+    }
+
+    private fun initializeContainer() {
+        appContainer = (requireActivity().application as MyApplication).appContainer
+        appContainer.fragmentSettingContainer =
+            FragmentSettingContainer(appContainer.myViewModelFactory, this)
     }
 
     fun set(normalTime: Long? = null, shortTime: Long? = null, longTime: Long? = null) {
@@ -122,9 +134,9 @@ class SettingsFragment : Fragment() {
     fun initializeData(bar: SeekBar, times: Times, seekBarText: TextView) {
         bar.max = 60
         bar.min = 1
-        var latestProgress = (sharedPref.getLong(times.name, times.time) / (60000)).toInt()
+        val latestProgress = (sharedPref.getLong(times.name, times.time) / (60000)).toInt()
         bar.progress = latestProgress
-        seekBarText.text = latestProgress.toString() + " min"
+        seekBarText.text = "${latestProgress.toString()}   min"
 
     }
 
@@ -135,13 +147,18 @@ class SettingsFragment : Fragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_delete_alldata -> {
-                viewModel.deleteAlldata()
+                viewModel?.deleteAlldata()
                 true
             }
             else -> {
                 false
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        appContainer.fragmentSettingContainer = null
     }
 
 

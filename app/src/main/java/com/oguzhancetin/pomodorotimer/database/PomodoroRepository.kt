@@ -9,9 +9,9 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.*
 
-class PomodoRepository(context: Context) {
+class PomodoroRepository(var context: Context) {
 
-    lateinit var  allPomodoro:LiveData<List<Pomodoro>>
+     var  allPomodoro:LiveData<List<Pomodoro>>
 
 
     private val pomodoroDao = PomodoroDatabase.getDatabase(context).pomodoroDao()

@@ -7,11 +7,13 @@ import androidx.fragment.app.Fragment
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.components.Description
 import com.github.mikephil.charting.data.*
+import com.oguzhancetin.pomodorotimer.MyApplication
 import com.oguzhancetin.pomodorotimer.R
+import com.oguzhancetin.pomodorotimer.di.AppContainer
+import com.oguzhancetin.pomodorotimer.di.FragmentStatContainer
 import com.oguzhancetin.pomodorotimer.database.Pomodoro
 import com.oguzhancetin.pomodorotimer.databinding.FragmentStatBinding
 import com.oguzhancetin.pomodorotimer.util.IntegerFormatter
@@ -25,10 +27,12 @@ import kotlin.collections.ArrayList
 
 class FragmentStat : Fragment() {
 
-    private lateinit var viewModel: FragmentStatusViewModel
+    private var viewModel: FragmentStatusViewModel? = null
+
+    private lateinit var appContainer: AppContainer
     private lateinit var mLineChart: BarChart
 
-    var yAxisMax: Float = 10f;
+    var yAxisMax: Float = 10f
 
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -41,14 +45,15 @@ class FragmentStat : Fragment() {
         // Inflate the layout for this fragment
         val binding = FragmentStatBinding.inflate(inflater)
         setHasOptionsMenu(true)
-        //val viewModelFactory = FragmentMainViewmodelFactory(requireActivity().application)
-        viewModel = ViewModelProvider(this).get(FragmentStatusViewModel::class.java)
+        initializeContainer()
+        viewModel = appContainer.fragmentStatContainer?.fragmentStatusViewModel
+
 
         mLineChart = binding.chart
-        cofigureLineChart(mLineChart)
+        configureLineChart(mLineChart)
 
 
-        viewModel.allPomodoro.observe(viewLifecycleOwner, Observer { pomodoros ->
+        viewModel?.allPomodoro?.observe(viewLifecycleOwner, { pomodoros ->
             pomodoros?.let {
                 setGraphData(pomodoros)
                 mLineChart.invalidate()
@@ -57,16 +62,23 @@ class FragmentStat : Fragment() {
         return binding.root
     }
 
-    private fun cofigureLineChart(mLineChart: BarChart) {
+    private fun initializeContainer() {
+        appContainer = (requireActivity().application as MyApplication).appContainer
+        appContainer.fragmentStatContainer =
+            FragmentStatContainer(appContainer.myViewModelFactory, this)
+
+    }
+
+    private fun configureLineChart(mLineChart: BarChart) {
         mLineChart.apply {
             xAxis.valueFormatter = MyaxisFormatter()
             axisRight.isEnabled = false
             xAxis.setDrawGridLines(false)
             setTouchEnabled(false)
             xAxis.axisMaximum = 6.5f
-            xAxis.granularity = 1f;
-            axisLeft.axisMinimum = 0f;
-            axisLeft.axisMaximum = yAxisMax;
+            xAxis.granularity = 1f
+            axisLeft.axisMinimum = 0f
+            axisLeft.axisMaximum = yAxisMax
             xAxis.yOffset = 13f
         }
 
@@ -113,7 +125,7 @@ class FragmentStat : Fragment() {
 
         }
 
-        val lineData = BarData(dataSet).also {
+        BarData(dataSet).also {
             it.barWidth = 0.6f
             mLineChart.data = it
             val desc = Description()
@@ -132,13 +144,18 @@ class FragmentStat : Fragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_delete_alldata -> {
-                viewModel.deleteAlldata()
+                viewModel?.deleteAlldata()
                 true
             }
             else -> {
                 false
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        appContainer.fragmentStatContainer = null
     }
 
 
